@@ -5,7 +5,7 @@ export class Quadra {
 
 export class Reserva {
     quadra: number = 0;
-    data: string = "";
-    horario: string = "";
+    horario: number = 0;
     nome: string = "";
+    esporte: string = "";
 }

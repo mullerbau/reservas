@@ -4,6 +4,8 @@ import { Quadra, Reserva } from "./quadras";
 const teclado = prompt()
 const quadras: Quadra[] = [];
 const reservas: Reserva[] = [];
+let horariosDisponiveis: number[] = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+const esportesDisponiveis: string[] = ['Basquete', 'Futebol', 'Pádel', 'Vôlei'];
 
 function mostrarMenu(): void {
     console.log("########### MENU ###########");
@@ -15,23 +17,11 @@ function mostrarMenu(): void {
 }
 
 
-while (true) {
-    console.log("Abrir Menu Sim(8) Não(9)");
+while (true) { 
 
+    mostrarMenu();
     const opcao = +teclado('Escolha uma opção: ');
-
-    if (opcao === 0) {
-        console.log("Saindo...");
-        break;
-    }
-
-    if (opcao === 8) {
-        mostrarMenu();
-    } else if (opcao === 9) {
-        console.log("Saindo...");
-        break;
-    }
-
+    
     switch (opcao) {
         case 1:
             const quadra: Quadra = criarQuadra();
@@ -47,20 +37,44 @@ while (true) {
 
         case 3:
             listarQuadras();
+            break;
 
         case 4:
             listarReservas();
             break;
 
-        default:
+        case 0: 
+            console.log('Saindo...')
             break;
+
+        default:
+            console.log('Tente novamente.')
+            break;
+    }
+    if (opcao === 0) {
+        break;
     }
 }
 
 function criarQuadra(): Quadra {
     const quadra: Quadra = new Quadra();
     quadra.numero = +teclado('Número da Quadra: ');
-    quadra.esporte = teclado('Esporte: ');
+
+    console.log('Escolha um esporte: ');
+    esportesDisponiveis.forEach((esporte, index) =>{
+        console.log(`${index + 1} - ${esporte}`);
+    });
+
+    const escolhaEsporte = +teclado('Escolha um esporte (número): ');
+    const esporteEscolhido = esportesDisponiveis[escolhaEsporte - 1];
+
+    if(esporteEscolhido) {
+        quadra.esporte = esporteEscolhido;
+    } else {
+        console.log('Esporte inválido.')
+        return criarQuadra();
+    }
+
     return quadra;
 }
 
@@ -80,14 +94,52 @@ function listarQuadras() {
     }
 }
 
+function exibirHorariosDisponiveis(): void {
+    console.log("Horários disponíveis:");
+    horariosDisponiveis.forEach((horario, index) => {
+        console.log(`${index + 1} - ${horario}:00`);
+    });
+}
+
+function removerHorario(horarioEscolhido: number): void {
+    horariosDisponiveis = horariosDisponiveis.filter(horario => horario !== horarioEscolhido);
+}
+
+
 function fazerReserva(): Reserva {
     const reserva: Reserva = new Reserva();
+
+    listarQuadras();
+
     reserva.quadra = +teclado('Número da Quadra: ');
-    reserva.data = teclado('Data (Dia/Mês): ');
-    reserva.horario = teclado('Horário: ');
+
+    //esse "q" verifica se o número da quadra escolhida é o mesmo que o cara botou na hora de criar, se não encontrar, será undefined, dará como erro, e irá voltar para criação da reserva. gpt q me ensinou.
+    const quadraEscolhida = quadras.find(q => q.numero === reserva.quadra);
+    if (!quadraEscolhida) {
+        console.log("Quadra não encontrada. Tente novamente.");
+        return fazerReserva(); 
+    }
+
+    reserva.esporte = quadraEscolhida.esporte;
+
+    exibirHorariosDisponiveis();
+    const escolha = +teclado('Escolha um horário disponível (número): ');
+    
+    //Se colocar o número errado, dará como erro e irá voltar para escolha do bgl;
+    const horarioEscolhido = horariosDisponiveis[escolha - 1];
+    if (horarioEscolhido !== undefined) {
+        reserva.horario = horarioEscolhido;
+        removerHorario(horarioEscolhido);
+    } else {
+        console.log("Horário inválido, tente novamente.");
+        return fazerReserva();
+    }
+
     reserva.nome = teclado('Nome da Reserva: ');
+
     return reserva;
 }
+
 
 function listarReservas() {
     if (reservas.length === 0) {
@@ -99,9 +151,8 @@ function listarReservas() {
         reservas.forEach((reserva) => {
             console.log(`Reserva:`);
             console.log(`Quadra: ${reserva.quadra}`);
-            console.log(`Esporte: ${reserva.data}`);
-            console.log(`Esporte: ${reserva.horario}`);
-            console.log(`Esporte: ${reserva.nome}`);
+            console.log(`Nome da reserva: ${reserva.nome}`);
+            console.log(`Esporte: ${reserva.esporte}`);
             console.log('---------------------');
         });
     }
